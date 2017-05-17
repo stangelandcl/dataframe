@@ -21,6 +21,8 @@ SOURCES=\
 	src/columnUInt16.c \
 	src/columnUInt32.c \
 	src/columnUInt64.c \
+	src/columnFloat32.c \
+	src/columnFloat64.c \
 	src/columnString.c \
 	src/dataframe.c
 STATIC_OBJDIR=obj/static
