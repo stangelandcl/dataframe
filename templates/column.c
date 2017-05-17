@@ -35,6 +35,7 @@ DecRef(DataFrame_Column{{name}}* self)
     {
         free(s->data);
         DataFrame_BitVector_Destroy(&s->na);
+	free(self);
         return true;
     }
     return false;

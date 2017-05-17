@@ -22,12 +22,10 @@ DecRef(DataFrame* self)
     size_t i;
     if(--self->ref_count == 0)
     {
-        for(i=0;i<self->size;i++)
-        {
-            self->columns[i]->methods->DecRef(self->columns[i]);
-            free(self->columns[i]);
-        }
+        for(i=0;i<self->size;i++)        
+            self->columns[i]->methods->DecRef(self->columns[i]);        
         free(self->columns);
+	free(self);
         return true;
     }
     return false;

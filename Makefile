@@ -7,9 +7,7 @@ CFLAGS+=-ggdb3 -Iinclude $(ERRORS)
 #ERRORS=
 LIBNAME=dataframe
 STATIC_LIB=$(LIBNAME).a
-STATIC_CFLAGS:=$(CFLAGS)
 SHARED_LIB=$(LIBNAME).so
-SHARED_CFLAGS:=$(CFLAGS) -fPIC
 
 SOURCES=\
 	src/bitvector.c \
