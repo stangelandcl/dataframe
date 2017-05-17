@@ -1,25 +1,25 @@
-#include "dataframe/columnInt16.h"
+#include "dataframe/columnCString.h"
 #include "dataframe/atomic.h"
 #include <memory.h>
 
-#define SELF ((DataFrame_ColumnInt16Impl*)self)
+#define SELF ((DataFrame_ColumnCStringImpl*)self)
 
 typedef struct
 {
     /* public */
-    DataFrame_ColumnInt16Methods* methods;
+    DataFrame_ColumnCStringMethods* methods;
 
     /* private */
     volatile uint32_t ref_count;
     char* name;
-    int16_t* data;
+    char** data;
     size_t size;
     size_t capacity;
     DataFrame_BitVector na;
-} DataFrame_ColumnInt16Impl;
+} DataFrame_ColumnCStringImpl;
 
 static void*
-Cast(DataFrame_ColumnInt16* self, DataFrame_Type type)
+Cast(DataFrame_ColumnCString* self, DataFrame_Type type)
 {
     if(SELF->methods->_typeID == type)
         return self;
@@ -27,13 +27,13 @@ Cast(DataFrame_ColumnInt16* self, DataFrame_Type type)
 }
 
 static bool
-IncRef(DataFrame_ColumnInt16* self)
+IncRef(DataFrame_ColumnCString* self)
 {
     return InterlockedIncrement(&SELF->ref_count) > 0;
 }
 
 static bool
-DecRef(DataFrame_ColumnInt16* self)
+DecRef(DataFrame_ColumnCString* self)
 {
     if(!InterlockedDecrement(&SELF->ref_count))
     {
@@ -46,13 +46,13 @@ DecRef(DataFrame_ColumnInt16* self)
 }
 
 static size_t
-Size(DataFrame_ColumnInt16* self)
+Size(DataFrame_ColumnCString* self)
 {
     return SELF->size;
 }
 
 static void
-Clear(DataFrame_ColumnInt16* self)
+Clear(DataFrame_ColumnCString* self)
 {
     SELF->size = 0;
     SELF->na.size = 0;
@@ -60,7 +60,7 @@ Clear(DataFrame_ColumnInt16* self)
 
 static bool
 TryGet(
-    DataFrame_ColumnInt16* self, size_t index, int16_t* v)
+    DataFrame_ColumnCString* self, size_t index, char** v)
 {
     bool na = DataFrame_BitVector_Get(&SELF->na, index);
     if(na) return false;
@@ -69,15 +69,15 @@ TryGet(
 }
 
 static const char*
-Resize(DataFrame_ColumnInt16Impl* self)
+Resize(DataFrame_ColumnCStringImpl* self)
 {
-    int16_t* d;
+    char** d;
     size_t newSize;
 
     newSize = SELF->size * 2;
     if(!newSize) newSize = 4;
 
-    d = realloc(SELF->data, newSize + sizeof(int16_t));
+    d = realloc(SELF->data, newSize + sizeof(char*));
     if(!d) return "DataFrame_ColumnInt8_Add: Out of memory";
     SELF->data = d;
     SELF->capacity = newSize;
@@ -86,10 +86,10 @@ Resize(DataFrame_ColumnInt16Impl* self)
 }
 
 static const char*
-Add(DataFrame_ColumnInt16* self, int16_t v)
+Add(DataFrame_ColumnCString* self, char* v)
 {
     size_t newSize;
-    int16_t* d;
+    char** d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, false);
     if(e) return e;
 
@@ -105,7 +105,7 @@ Add(DataFrame_ColumnInt16* self, int16_t v)
 }
 
 static void
-Set(DataFrame_ColumnInt16* self, size_t i, int16_t v)
+Set(DataFrame_ColumnCString* self, size_t i, char* v)
 {
     DataFrame_BitVector_Set(&SELF->na, i, false);
     SELF->data[i] = v;
@@ -113,10 +113,10 @@ Set(DataFrame_ColumnInt16* self, size_t i, int16_t v)
 
 
 static const char*
-AddNA(DataFrame_ColumnInt16* self)
+AddNA(DataFrame_ColumnCString* self)
 {
     size_t newSize;
-    int16_t* d;
+    char** d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, true);
     if(e) return e;
 
@@ -131,7 +131,7 @@ AddNA(DataFrame_ColumnInt16* self)
 }
 
 static void
-Remove(DataFrame_ColumnInt16* self, size_t i)
+Remove(DataFrame_ColumnCString* self, size_t i)
 {
     DataFrame_BitVector_Remove(&SELF->na, i);
     memmove(&SELF->data[i], &SELF->data[i+1], SELF->size - i - 1);
@@ -140,19 +140,19 @@ Remove(DataFrame_ColumnInt16* self, size_t i)
 
 
 static void
-SetNA(DataFrame_ColumnInt16* self, size_t i)
+SetNA(DataFrame_ColumnCString* self, size_t i)
 {
     DataFrame_BitVector_Set(&SELF->na, i, true);
 }
 
 static char*
-GetName(DataFrame_ColumnInt16* self)
+GetName(DataFrame_ColumnCString* self)
 {
     return SELF->name;
 }
 
 static const char*
-SetName(DataFrame_ColumnInt16* self, const char* name)
+SetName(DataFrame_ColumnCString* self, const char* name)
 {
     const char* e;
     char* n;
@@ -164,17 +164,17 @@ SetName(DataFrame_ColumnInt16* self, const char* name)
     }
 
     n = strdup(name);
-    if(!n) return "DataFrame_ColumnInt16_SetName: Out of memory";
+    if(!n) return "DataFrame_ColumnCString_SetName: Out of memory";
 
     SELF->name = n;
     return NULL;
 }
 
 
-static DataFrame_ColumnInt16Methods Int16Methods =
+static DataFrame_ColumnCStringMethods CStringMethods =
 {
 /* shared */
-    DataFrame_Type_ColumnInt16,
+    DataFrame_Type_ColumnCString,
     Cast,
     IncRef,
     DecRef,
@@ -193,13 +193,13 @@ static DataFrame_ColumnInt16Methods Int16Methods =
 };
 
 
-DataFrame_ColumnInt16* DataFrame_ColumnInt16_New()
+DataFrame_ColumnCString* DataFrame_ColumnCString_New()
 {
-    DataFrame_ColumnInt16Impl* c;
+    DataFrame_ColumnCStringImpl* c;
 
-    c = calloc(1, sizeof(DataFrame_ColumnInt16Impl));
+    c = calloc(1, sizeof(DataFrame_ColumnCStringImpl));
     if(!c) return NULL;
-    c->methods = &Int16Methods;
+    c->methods = &CStringMethods;
     c->ref_count = 1;
-    return (DataFrame_ColumnInt16*)c;
+    return (DataFrame_ColumnCString*)c;
 }

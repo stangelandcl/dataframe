@@ -13,6 +13,7 @@
 #include "dataframe/columnUInt64.h"
 #include "dataframe/columnFloat32.h"
 #include "dataframe/columnFloat64.h"
+#include "dataframe/columnCString.h"
 
 
 

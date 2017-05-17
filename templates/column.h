@@ -15,7 +15,7 @@ typedef struct
     void* (*Cast)(DataFrame_Column{{name}}* self, DataFrame_Type type);
     bool (*IncRef)(DataFrame_Column{{name}}* self);
     bool (*DecRef)(DataFrame_Column{{name}}* self);
-    size_t (*GetSize)(DataFrame_Column{{name}}* self);
+    size_t (*Size)(DataFrame_Column{{name}}* self);
     void (*Remove)(DataFrame_Column{{name}}* self, size_t i);
     void (*Clear)(DataFrame_Column{{name}}* self);
     char* (*GetName)(DataFrame_Column{{name}}* self);
@@ -24,11 +24,29 @@ typedef struct
 
     /* type specific */
     bool (*TryGet)(DataFrame_Column{{name}}* self, size_t index, {{type}}* v);
+
+    {% if "{{type}}" == "char*" %}
+    const char* (*Add)(DataFrame_Column{{name}}* self, const {{type}} v);
+    {% else %}
     const char* (*Add)(DataFrame_Column{{name}}* self, {{type}} v);
+    {% endif %}
+
     const char* (*AddNA)(DataFrame_Column{{name}}* self);
+
+    {% if "{{type}}" == "char*" %}
+    void (*Set)(DataFrame_Column{{name}}* self, size_t i, const {{type}} v);
+    {% else %}
     void (*Set)(DataFrame_Column{{name}}* self, size_t i, {{type}} v);
+    {% endif %}
+
     void (*SetNA)(DataFrame_Column{{name}}* self, size_t i);
 } DataFrame_Column{{name}}Methods;
+
+struct DataFrame_Column{{name}}
+{
+    DataFrame_Column{{name}}Methods* methods;
+};
+
 
 DATAFRAME_EXPORT DataFrame_Column{{name}}* DataFrame_Column{{name}}_New();
 

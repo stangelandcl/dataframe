@@ -16,7 +16,7 @@ typedef struct
     void* (*Cast)(DataFrame_Column* self, DataFrame_Type type);
     bool (*IncRef)(DataFrame_Column* self);
     bool (*DecRef)(DataFrame_Column* self);
-    size_t (*GetSize)(DataFrame_Column* self);
+    size_t (*Size)(DataFrame_Column* self);
     void (*Remove)(DataFrame_Column* self, size_t i);
     void (*Clear)(DataFrame_Column* self);
     char* (*GetName)(DataFrame_Column* self);

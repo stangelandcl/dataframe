@@ -15,7 +15,7 @@ typedef struct
     void* (*Cast)(DataFrame_ColumnInt64* self, DataFrame_Type type);
     bool (*IncRef)(DataFrame_ColumnInt64* self);
     bool (*DecRef)(DataFrame_ColumnInt64* self);
-    size_t (*GetSize)(DataFrame_ColumnInt64* self);
+    size_t (*Size)(DataFrame_ColumnInt64* self);
     void (*Remove)(DataFrame_ColumnInt64* self, size_t i);
     void (*Clear)(DataFrame_ColumnInt64* self);
     char* (*GetName)(DataFrame_ColumnInt64* self);
@@ -24,11 +24,21 @@ typedef struct
 
     /* type specific */
     bool (*TryGet)(DataFrame_ColumnInt64* self, size_t index, int64_t* v);
+
     const char* (*Add)(DataFrame_ColumnInt64* self, int64_t v);
+
     const char* (*AddNA)(DataFrame_ColumnInt64* self);
+
     void (*Set)(DataFrame_ColumnInt64* self, size_t i, int64_t v);
+
     void (*SetNA)(DataFrame_ColumnInt64* self, size_t i);
 } DataFrame_ColumnInt64Methods;
+
+struct DataFrame_ColumnInt64
+{
+    DataFrame_ColumnInt64Methods* methods;
+};
+
 
 DATAFRAME_EXPORT DataFrame_ColumnInt64* DataFrame_ColumnInt64_New();
 

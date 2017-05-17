@@ -23,13 +23,13 @@ DecRef(DataFrame* self)
     size_t i;
     if(!InterlockedDecrement(&self->ref_count))
     {
-        for(i=0;i<self->size;i++)        
-            self->columns[i]->methods->DecRef(self->columns[i]);        
+        for(i=0;i<self->size;i++)
+            self->columns[i]->methods->DecRef(self->columns[i]);
         free(self->columns);
-	free(self);
-        return true;
+        free(self);
+        return false;
     }
-    return false;
+    return true;
 }
 
 static size_t RowSize(DataFrame* self)
@@ -37,7 +37,7 @@ static size_t RowSize(DataFrame* self)
     DataFrame_Column* c;
     if(!self->size) return 0;
     c = self->columns[0];
-    return c->methods->GetSize(c);
+    return c->methods->Size(c);
 }
 
 static size_t ColumnSize(DataFrame* self)
@@ -54,12 +54,12 @@ static bool IsRectangular(DataFrame* self)
     if(!self->size) return true;
 
     c = self->columns[0];
-    sz = c->methods->GetSize(c);
+    sz = c->methods->Size(c);
 
     for(i=1;i<self->size;i++)
     {
         c = self->columns[i];
-        if(c->methods->GetSize(c) != sz)
+        if(c->methods->Size(c) != sz)
             return false;
     }
 
@@ -72,16 +72,17 @@ static const char* AddColumn(DataFrame* self, DataFrame_Column* c)
     size_t newSize;
     if(self->size == self->capacity)
     {
-        newSize = self->size * 2;
+        newSize = self->capacity * 2;
         if(!newSize) newSize = 4;
 
         d = realloc(self->columns, newSize * sizeof(DataFrame_Column*));
         if(!d) return "DataFrame_AddColumn: Out of memory";
 
         self->columns = d;
-        self->size = newSize;
+        self->capacity = newSize;
     }
 
+    c->methods->IncRef(c);
     self->columns[self->size++] = c;
     return NULL;
 }
@@ -108,9 +109,14 @@ static void RemoveRow(DataFrame* self, size_t index)
 
 static DataFrame_Column* GetColumnByIndex(DataFrame* self, size_t index)
 {
-    DataFrame_Column* n =  self->columns[index];
+    DataFrame_Column* n = self->columns[index];
     n->methods->IncRef(n);
     return n;
+}
+
+static DataFrame_Column* GetColumnRefByIndex(DataFrame* self, size_t index)
+{
+    return self->columns[index];
 }
 
 static DataFrameMethods methods =
@@ -126,6 +132,7 @@ static DataFrameMethods methods =
     RemoveColumn,
     RemoveRow,
     GetColumnByIndex,
+    GetColumnRefByIndex,
     IsRectangular
 };
 

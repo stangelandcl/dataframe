@@ -2,21 +2,26 @@
 #include "dataframe/atomic.h"
 #include <memory.h>
 
-struct DataFrame_Column{{name}}
+#define SELF ((DataFrame_Column{{name}}Impl*)self)
+
+typedef struct
 {
+    /* public */
     DataFrame_Column{{name}}Methods* methods;
+
+    /* private */
     volatile uint32_t ref_count;
     char* name;
     {{type}}* data;
     size_t size;
     size_t capacity;
     DataFrame_BitVector na;
-};
+} DataFrame_Column{{name}}Impl;
 
 static void*
 Cast(DataFrame_Column{{name}}* self, DataFrame_Type type)
 {
-    if(self->methods->_typeID == type)
+    if(SELF->methods->_typeID == type)
         return self;
     return NULL;
 }
@@ -24,126 +29,175 @@ Cast(DataFrame_Column{{name}}* self, DataFrame_Type type)
 static bool
 IncRef(DataFrame_Column{{name}}* self)
 {
-    return InterlockedIncrement(&self->ref_count) > 0;
+    return InterlockedIncrement(&SELF->ref_count) > 0;
 }
 
 static bool
 DecRef(DataFrame_Column{{name}}* self)
 {
-    DataFrame_Column{{name}}* s = (DataFrame_Column{{name}}*)self;
-
-    if(!InterlockedDecrement(&s->ref_count))
+    if(!InterlockedDecrement(&SELF->ref_count))
     {
-        free(s->data);
-        DataFrame_BitVector_Destroy(&s->na);
-	free(self);
-        return true;
+        free(SELF->data);
+        DataFrame_BitVector_Destroy(&SELF->na);
+        free(SELF);
+        return false;
     }
-    return false;
+    return true;
 }
 
 static size_t
 Size(DataFrame_Column{{name}}* self)
 {
-    return self->size;
+    return SELF->size;
 }
 
 static void
 Clear(DataFrame_Column{{name}}* self)
 {
-    self->size = 0;
-    self->na.size = 0;
+    SELF->size = 0;
+    SELF->na.size = 0;
 }
 
 static bool
 TryGet(
     DataFrame_Column{{name}}* self, size_t index, {{type}}* v)
 {
-    bool have = DataFrame_BitVector_Get(&self->na, index);
-    if(!have) return false;
-    *v = self->data[index];
+    bool na = DataFrame_BitVector_Get(&SELF->na, index);
+    if(na) return false;
+    *v = SELF->data[index];
     return true;
 }
 
 static const char*
-Resize(DataFrame_Column{{name}}* self)
+Resize(DataFrame_Column{{name}}Impl* self)
 {
     {{type}}* d;
     size_t newSize;
 
-    newSize = self->size * 2;
+    newSize = SELF->size * 2;
     if(!newSize) newSize = 4;
 
-    d = realloc(self->data, newSize + sizeof({{type}}));
+    d = realloc(SELF->data, newSize + sizeof({{type}}));
     if(!d) return "DataFrame_ColumnInt8_Add: Out of memory";
-    self->data = d;
-    self->capacity = newSize;
+    SELF->data = d;
+    SELF->capacity = newSize;
 
     return NULL;
 }
 
+{% if "{{type}}" == "char*" %}
 
+static const char*
+Add(DataFrame_Column{{name}}* self, const char* v)
+{
+    size_t newSize;
+    char** d;
+    char* v2;
+    bool na = v ? false : true;
+
+    const char* e = DataFrame_BitVector_Add(&SELF->na, na);
+    if(e) return e;
+
+    if(SELF->size == SELF->capacity)
+    {
+        e = Resize(SELF);
+        if(e) return e;
+    }
+
+    if(na)
+        SELF->data[SELF->size++] = NULL;
+    else
+    {
+        v2 = strdup(v);
+        if(!v2)
+            return "DataFrame_ColumnCString_Add: Out of memory";
+        SELF->data[SELF->size++] = v2;
+    }
+    return NULL;
+}
+
+static void
+Set(DataFrame_Column{{name}}* self, size_t i, const char* v)
+{
+    bool na = v ? false : true;
+    if(na)
+    {
+        DataFrame_BitVector_Set(&SELF->na, i, na);
+        SELF->data[i] = NULL;
+    }
+    else
+    {
+        SELF->data[i] = strdup(v);
+        DataFrame_BitVector_Set(&SELF->na, i, !na && SELF->data[i]);
+    }
+}
+
+{% else %}
 static const char*
 Add(DataFrame_Column{{name}}* self, {{type}} v)
 {
     size_t newSize;
     {{type}}* d;
-    const char* e = DataFrame_BitVector_Add(&self->na, false);
+    const char* e = DataFrame_BitVector_Add(&SELF->na, false);
     if(e) return e;
 
-    if(self->size == self->capacity)
+    if(SELF->size == SELF->capacity)
     {
-        e = Resize(self);
+        e = Resize(SELF);
         if(e) return e;
     }
 
 
-    self->data[self->size++] = v;
+    SELF->data[SELF->size++] = v;
     return NULL;
 }
+
+static void
+Set(DataFrame_Column{{name}}* self, size_t i, {{type}} v)
+{
+    DataFrame_BitVector_Set(&SELF->na, i, false);
+    SELF->data[i] = v;
+}
+
+{% endif %}
 
 static const char*
 AddNA(DataFrame_Column{{name}}* self)
 {
     size_t newSize;
     {{type}}* d;
-    const char* e = DataFrame_BitVector_Add(&self->na, true);
+    const char* e = DataFrame_BitVector_Add(&SELF->na, true);
     if(e) return e;
 
-    if(self->size == self->capacity)
+    if(SELF->size == SELF->capacity)
     {
-        e = Resize(self);
+        e = Resize(SELF);
         if(e) return e;
     }
 
-    self->size++;
+    SELF->size++;
     return NULL;
 }
 
 static void
 Remove(DataFrame_Column{{name}}* self, size_t i)
 {
-    DataFrame_BitVector_Remove(&self->na, i);
-    memmove(&self->data[i], &self->data[i+1], self->size - i - 1);
+    DataFrame_BitVector_Remove(&SELF->na, i);
+    memmove(&SELF->data[i], &SELF->data[i+1], SELF->size - i - 1);
+    SELF->size--;
 }
 
-static void
-Set(DataFrame_Column{{name}}* self, size_t i, {{type}} v)
-{
-    DataFrame_BitVector_Set(&self->na, i, false);
-    self->data[i] = v;
-}
 
 static void
 SetNA(DataFrame_Column{{name}}* self, size_t i)
 {
-    DataFrame_BitVector_Set(&self->na, i, true);
+    DataFrame_BitVector_Set(&SELF->na, i, true);
 }
 
 static char*
 GetName(DataFrame_Column{{name}}* self)
 {
-    return self->name;
+    return SELF->name;
 }
 
 static const char*
@@ -154,14 +208,14 @@ SetName(DataFrame_Column{{name}}* self, const char* name)
 
     if(!name)
     {
-        self->name = NULL;
+        SELF->name = NULL;
         return NULL;
     }
 
     n = strdup(name);
     if(!n) return "DataFrame_Column{{name}}_SetName: Out of memory";
 
-    self->name = n;
+    SELF->name = n;
     return NULL;
 }
 
@@ -190,11 +244,11 @@ static DataFrame_Column{{name}}Methods {{name}}Methods =
 
 DataFrame_Column{{name}}* DataFrame_Column{{name}}_New()
 {
-    DataFrame_Column{{name}}* c;
+    DataFrame_Column{{name}}Impl* c;
 
-    c = calloc(1, sizeof(DataFrame_Column{{name}}));
+    c = calloc(1, sizeof(DataFrame_Column{{name}}Impl));
     if(!c) return NULL;
     c->methods = &{{name}}Methods;
     c->ref_count = 1;
-    return c;
+    return (DataFrame_Column{{name}}*)c;
 }

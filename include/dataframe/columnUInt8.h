@@ -15,7 +15,7 @@ typedef struct
     void* (*Cast)(DataFrame_ColumnUInt8* self, DataFrame_Type type);
     bool (*IncRef)(DataFrame_ColumnUInt8* self);
     bool (*DecRef)(DataFrame_ColumnUInt8* self);
-    size_t (*GetSize)(DataFrame_ColumnUInt8* self);
+    size_t (*Size)(DataFrame_ColumnUInt8* self);
     void (*Remove)(DataFrame_ColumnUInt8* self, size_t i);
     void (*Clear)(DataFrame_ColumnUInt8* self);
     char* (*GetName)(DataFrame_ColumnUInt8* self);
@@ -24,11 +24,21 @@ typedef struct
 
     /* type specific */
     bool (*TryGet)(DataFrame_ColumnUInt8* self, size_t index, uint8_t* v);
+
     const char* (*Add)(DataFrame_ColumnUInt8* self, uint8_t v);
+
     const char* (*AddNA)(DataFrame_ColumnUInt8* self);
+
     void (*Set)(DataFrame_ColumnUInt8* self, size_t i, uint8_t v);
+
     void (*SetNA)(DataFrame_ColumnUInt8* self, size_t i);
 } DataFrame_ColumnUInt8Methods;
+
+struct DataFrame_ColumnUInt8
+{
+    DataFrame_ColumnUInt8Methods* methods;
+};
+
 
 DATAFRAME_EXPORT DataFrame_ColumnUInt8* DataFrame_ColumnUInt8_New();
 

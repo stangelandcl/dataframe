@@ -1,13 +1,18 @@
-CC?=gcc
-OPT?=-O3
+CC?=ccache gcc
+ifdef DEBUG
+OPT:=-O0 #-DDEBUG
+else
+OPT:=-O3 -fomit-frame-pointer -mtune=native -DNDEBUG
+endif
+
 ERRORS:= -Wall -Werror -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -pedantic -Wc90-c99-compat -Wc99-c11-compat
-CFLAGS+=-ggdb3 -Iinclude $(ERRORS)
+CFLAGS+=-ggdb3 -Iinclude $(ERRORS) $(OPT)
 #CC=clang
 #OPT=-O3
 #ERRORS=
 LIBNAME=dataframe
-STATIC_LIB=$(LIBNAME).a
-SHARED_LIB=$(LIBNAME).so
+STATIC_LIB=lib$(LIBNAME).a
+SHARED_LIB=lib$(LIBNAME).so
 
 SOURCES=\
 	src/bitvector.c \
@@ -21,15 +26,17 @@ SOURCES=\
 	src/columnUInt64.c \
 	src/columnFloat32.c \
 	src/columnFloat64.c \
-	src/columnString.c \
+	src/columnCString.c \
 	src/dataframe.c
+TEST_SOURCES=test/test.c
 STATIC_OBJDIR=obj/static
 SHARED_OBJDIR=obj/shared
 OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
 SHARED_OBJECTS=$(addprefix $(SHARED_OBJDIR)/, $(OBJECTS))
 STATIC_OBJECTS=$(addprefix $(STATIC_OBJDIR)/, $(OBJECTS))
+TEST=check
 
-.PHONY: all compile
+.PHONY: all compile check
 
 compile: generate
 	@mkdir -p obj/shared obj/static
@@ -61,5 +68,14 @@ $(SHARED_LIB): $(SHARED_OBJECTS)
 	@$(CC) $(LDFLAGS) $(SHARED_OBJECTS) -shared -o $@
 	@echo "LD $(SHARED_LIB)"
 
+check: $(STATIC_LIB)
+	@$(CC) $(CFLAGS) $(LDFLAGS) $(TEST_SOURCES) -o $(TEST) -L. -Wl,-Bstatic -l$(LIBNAME) -Wl,-Bdynamic
+	./check
+
 clean:
-	@rm -rf obj $(OBJECTS) $(STATIC_LIB) $(SHARED_LIB)
+	@rm -rf obj $(OBJECTS) $(STATIC_LIB) $(SHARED_LIB) $(TEST)
+
+all: 
+	@make --no-print-directory clean
+	@make --no-print-directory compile
+	@make --no-print-directory check

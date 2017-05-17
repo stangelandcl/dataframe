@@ -2,7 +2,7 @@
 #define GUARD_0E442C72_2AC5_4E27_8ACF_1E1F557A5F25
 
 #include "dataframe/config.h"
-#include "dataframe/column.h"
+#include "dataframe/columns.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,10 +20,14 @@ struct DataFrameMethods
     size_t (*RowSize)(DataFrame* self);
     size_t (*ColumnSize)(DataFrame* self);
 
+    /* Calls IncRef */
     const char* (*AddColumn)(DataFrame* self, DataFrame_Column* column);
     void (*RemoveColumn)(DataFrame* self, size_t index);
     void (*RemoveRow)(DataFrame* self, size_t index);
+    /* Increments ref_count */
     DataFrame_Column* (*GetColumnByIndex)(DataFrame* self, size_t index);
+    /* Does not increment ref_count */
+    DataFrame_Column* (*GetColumnRefByIndex)(DataFrame* self, size_t index);
     bool (*IsRectangular)(DataFrame* self);
 };
 
