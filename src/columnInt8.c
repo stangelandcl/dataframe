@@ -4,6 +4,10 @@
 
 #define SELF ((DataFrame_ColumnInt8Impl*)self)
 
+#ifdef _MSC_VER
+   #define strdup _strdup
+#endif
+
 typedef struct
 {
     /* public */
@@ -88,8 +92,6 @@ Resize(DataFrame_ColumnInt8Impl* self)
 static const char*
 Add(DataFrame_ColumnInt8* self, int8_t v)
 {
-    size_t newSize;
-    int8_t* d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, false);
     if(e) return e;
 
@@ -115,8 +117,6 @@ Set(DataFrame_ColumnInt8* self, size_t i, int8_t v)
 static const char*
 AddNA(DataFrame_ColumnInt8* self)
 {
-    size_t newSize;
-    int8_t* d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, true);
     if(e) return e;
 
@@ -154,7 +154,6 @@ GetName(DataFrame_ColumnInt8* self)
 static const char*
 SetName(DataFrame_ColumnInt8* self, const char* name)
 {
-    const char* e;
     char* n;
 
     if(!name)

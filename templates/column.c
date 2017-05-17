@@ -4,6 +4,10 @@
 
 #define SELF ((DataFrame_Column{{name}}Impl*)self)
 
+#ifdef _MSC_VER
+   #define strdup _strdup
+#endif
+
 typedef struct
 {
     /* public */
@@ -90,8 +94,6 @@ Resize(DataFrame_Column{{name}}Impl* self)
 static const char*
 Add(DataFrame_Column{{name}}* self, const char* v)
 {
-    size_t newSize;
-    char** d;
     char* v2;
     bool na = v ? false : true;
 
@@ -136,8 +138,6 @@ Set(DataFrame_Column{{name}}* self, size_t i, const char* v)
 static const char*
 Add(DataFrame_Column{{name}}* self, {{type}} v)
 {
-    size_t newSize;
-    {{type}}* d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, false);
     if(e) return e;
 
@@ -164,8 +164,6 @@ Set(DataFrame_Column{{name}}* self, size_t i, {{type}} v)
 static const char*
 AddNA(DataFrame_Column{{name}}* self)
 {
-    size_t newSize;
-    {{type}}* d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, true);
     if(e) return e;
 
@@ -203,7 +201,6 @@ GetName(DataFrame_Column{{name}}* self)
 static const char*
 SetName(DataFrame_Column{{name}}* self, const char* name)
 {
-    const char* e;
     char* n;
 
     if(!name)

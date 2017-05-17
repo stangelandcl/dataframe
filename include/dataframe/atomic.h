@@ -6,8 +6,11 @@ extern "C" {
 #endif
 
 #if defined(_MSC_VER)
-    long __cdecl InterlockedIncrement(long volatile *Addend);
-    long __cdecl InterlockedDecrement(long volatile *Addend);
+    #pragma comment(lib, "kernel32.lib")
+    long __cdecl _InterlockedIncrement(long volatile *Addend);
+    long __cdecl _InterlockedDecrement(long volatile *Addend);
+    #define InterlockedIncrement _InterlockedIncrement
+    #define InterlockedDecrement _InterlockedDecrement
 #elif defined(__GNUC__)
     #ifndef InterlockedIncrement
         #define InterlockedIncrement(p) \

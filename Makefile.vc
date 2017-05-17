@@ -1,0 +1,56 @@
+all: shared static
+
+# Open MSVC tools window and run: nmake /f Makefile.vc MACHINE=[x86|x64]
+LIB=dateframe
+CPPNAME=DATAFRAME
+SOURCES=\
+	src/bitvector.c \
+	src/columnInt8.c \
+	src/columnInt16.c \
+	src/columnInt32.c \
+	src/columnInt64.c \
+	src/columnUInt8.c \
+	src/columnUInt16.c \
+	src/columnUInt32.c \
+	src/columnUInt64.c \
+	src/columnFloat32.c \
+	src/columnFloat64.c \
+	src/columnCString.c \
+	src/dataframe.c
+
+CFLAGS=/O2 /DNDEBUG /MD /FD /EHsc /W3 /nologo /D_CRT_SECURE_NO_WARNINGS
+OBJS=\
+	bitvector.obj \
+	columnInt8.obj \
+	columnInt16.obj \
+	columnInt32.obj \
+	columnInt64.obj \
+	columnUInt8.obj \
+	columnUInt16.obj \
+	columnUInt32.obj \
+	columnUInt64.obj \
+	columnFloat32.obj \
+	columnFloat64.obj \
+	columnCString.obj \
+	dataframe.obj
+
+INCLUDE=/Iinclude /I"$(VCINSTALLDIR)include" /I"$(UNIVERSALCRTSDKDIR)\Include\$(UCRTVERSION)\ucrt" /I"$(WINDOWSSDKDIR)Include\um" /I"$(WINDOWSSDKDIR)Include\Shared"
+LIBDIR1=/LIBPATH:"$(WINDOWSSDKDIR)lib\$(WINDOWSSDKLIBVERSION)um\$(MACHINE)" /LIBPATH:"$(UNIVERSALCRTSDKDIR)lib\$(UCRTVERSION)\ucrt\$(MACHINE)" 
+!IF "$(MACHINE)"=="x64"
+LIBDIR=/LIBPATH:"$(VCINSTALLDIR)lib\amd64" $(LIBDIR1)
+!ELSE
+LIBDIR=/LIBPATH:"$(VCINSTALLDIR)lib" $(LIBDIR1)
+!ENDIF
+LIBS=
+#kernel32.lib
+
+shared:
+    cl $(CFLAGS) $(INCLUDE) /D$(CPPNAME)_COMPILE_DLL /c $(SOURCES) 
+    if not exist $(MACHINE) mkdir $(MACHINE)
+    link /DLL /nologo $(OBJS) $(LIBDIR) /machine:$(MACHINE) /out:$(MACHINE)/$(LIB).dll $(LIBS)
+    
+static:
+    cl $(CFLAGS) $(INCLUDE) /D$(CPPNAME)_STATIC /c $(SOURCES)
+    if not exist $(MACHINE) mkdir $(MACHINE)
+    link /lib /nologo $(OBJS) $(LIBDIR) /machine:$(MACHINE) /out:$(MACHINE)/$(LIB)_a.lib $(LIBS)
+

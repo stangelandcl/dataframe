@@ -4,6 +4,10 @@
 
 #define SELF ((DataFrame_ColumnCStringImpl*)self)
 
+#ifdef _MSC_VER
+   #define strdup _strdup
+#endif
+
 typedef struct
 {
     /* public */
@@ -88,8 +92,6 @@ Resize(DataFrame_ColumnCStringImpl* self)
 static const char*
 Add(DataFrame_ColumnCString* self, char* v)
 {
-    size_t newSize;
-    char** d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, false);
     if(e) return e;
 
@@ -115,8 +117,6 @@ Set(DataFrame_ColumnCString* self, size_t i, char* v)
 static const char*
 AddNA(DataFrame_ColumnCString* self)
 {
-    size_t newSize;
-    char** d;
     const char* e = DataFrame_BitVector_Add(&SELF->na, true);
     if(e) return e;
 
@@ -154,7 +154,6 @@ GetName(DataFrame_ColumnCString* self)
 static const char*
 SetName(DataFrame_ColumnCString* self, const char* name)
 {
-    const char* e;
     char* n;
 
     if(!name)

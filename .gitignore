@@ -3,3 +3,9 @@
 *.o
 obj
 check
+*.obj
+*.idb
+*.exe
+*.dll
+x64/
+x86/
