@@ -13,6 +13,8 @@ CFLAGS+=-ggdb3 -Iinclude $(ERRORS) $(OPT)
 LIBNAME=dataframe
 STATIC_LIB=lib$(LIBNAME).a
 SHARED_LIB=lib$(LIBNAME).so
+PREFIX?=/usr/local
+
 
 SOURCES=\
 	src/bitvector.c \
@@ -79,3 +81,7 @@ all:
 	@make --no-print-directory clean
 	@make --no-print-directory compile
 	@make --no-print-directory check
+
+install:
+	cp $(STATIC_LIB) $(PREFIX)/lib/$(STATIC_LIB)
+	cp $(SHARED_LIB) $(PREFIX)/lib/$(SHARED_LIB)
