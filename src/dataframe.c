@@ -110,7 +110,7 @@ static void RemoveRow(DataFrame* self, size_t index)
 static DataFrame_Column* GetColumnByIndex(DataFrame* self, size_t index)
 {
     DataFrame_Column* n =  self->columns[index];
-    /* n->methods->IncRef(n); */
+    n->methods->IncRef(n);
     return n;
 }
 
