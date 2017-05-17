@@ -1,6 +1,6 @@
 #include "dataframe/columnInt8.h"
 #include "dataframe/atomic.h"
-#include <memory.h>
+#include <string.h>
 
 #define SELF ((DataFrame_ColumnInt8Impl*)self)
 

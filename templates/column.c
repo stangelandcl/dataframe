@@ -1,6 +1,6 @@
 #include "dataframe/column{{name}}.h"
 #include "dataframe/atomic.h"
-#include <memory.h>
+#include <string.h>
 
 #define SELF ((DataFrame_Column{{name}}Impl*)self)
 

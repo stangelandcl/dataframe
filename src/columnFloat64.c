@@ -1,6 +1,6 @@
 #include "dataframe/columnFloat64.h"
 #include "dataframe/atomic.h"
-#include <memory.h>
+#include <string.h>
 
 #define SELF ((DataFrame_ColumnFloat64Impl*)self)
 

@@ -1,6 +1,6 @@
 #include "dataframe/dataframe.h"
 #include "dataframe/atomic.h"
-#include <memory.h>
+#include <string.h>
 
 
 static void*

@@ -1,6 +1,6 @@
 #include "dataframe/columnCString.h"
 #include "dataframe/atomic.h"
-#include <memory.h>
+#include <string.h>
 
 #define SELF ((DataFrame_ColumnCStringImpl*)self)
 
