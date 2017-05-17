@@ -1,4 +1,5 @@
 #include "dataframe/columnString.h"
+#include "dataframe/atomic.h"
 #include <memory.h>
 #include <string.h>
 
@@ -9,7 +10,7 @@
 struct DataFrame_ColumnCString
 {
     DataFrame_ColumnCStringMethods* methods;
-    uint32_t ref_count;
+    volatile int32_t ref_count;
     char* name;
     char** data;
     size_t size;
@@ -28,7 +29,7 @@ Cast(DataFrame_ColumnCString* self, DataFrame_Type type)
 static bool
 IncRef(DataFrame_ColumnCString* self)
 {
-    return ++self->ref_count > 0;
+    return InterlockedIncrement(&self->ref_count) > 0;
 }
 
 static bool
@@ -37,7 +38,7 @@ DecRef(DataFrame_ColumnCString* self)
     size_t i;
     DataFrame_ColumnCString* s = (DataFrame_ColumnCString*)self;
 
-    if(--s->ref_count == 0)
+    if(!InterlockedDecrement(&s->ref_count))
     {
         for(i=0;i<s->size;i++)
             free(s->data[i]);

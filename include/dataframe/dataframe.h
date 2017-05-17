@@ -4,6 +4,11 @@
 #include "dataframe/config.h"
 #include "dataframe/column.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct DataFrame DataFrame;
 typedef struct DataFrameMethods DataFrameMethods;
 struct DataFrameMethods
@@ -25,7 +30,7 @@ struct DataFrameMethods
 struct DataFrame
 {
     DataFrameMethods* methods;
-    int32_t ref_count;
+    volatile int32_t ref_count;
     DataFrame_Column** columns;
     size_t size;
     size_t capacity;
@@ -33,6 +38,9 @@ struct DataFrame
 
 DataFrame* DataFrame_New();
 
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

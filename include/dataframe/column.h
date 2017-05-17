@@ -5,6 +5,10 @@
 #include "dataframe/bitvector.h"
 #include "dataframe/types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct DataFrame_Column DataFrame_Column;
 typedef struct
 {
@@ -24,6 +28,9 @@ struct DataFrame_Column
     DataFrame_ColumnMethods* methods;
 };
 
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

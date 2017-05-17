@@ -1,10 +1,11 @@
 #include "dataframe/column{{name}}.h"
+#include "dataframe/atomic.h"
 #include <memory.h>
 
 struct DataFrame_Column{{name}}
 {
     DataFrame_Column{{name}}Methods* methods;
-    uint32_t ref_count;
+    volatile uint32_t ref_count;
     char* name;
     {{type}}* data;
     size_t size;
@@ -23,7 +24,7 @@ Cast(DataFrame_Column{{name}}* self, DataFrame_Type type)
 static bool
 IncRef(DataFrame_Column{{name}}* self)
 {
-    return ++self->ref_count > 0;
+    return InterlockedIncrement(&self->ref_count) > 0;
 }
 
 static bool
@@ -31,7 +32,7 @@ DecRef(DataFrame_Column{{name}}* self)
 {
     DataFrame_Column{{name}}* s = (DataFrame_Column{{name}}*)self;
 
-    if(--s->ref_count == 0)
+    if(!InterlockedDecrement(&s->ref_count))
     {
         free(s->data);
         DataFrame_BitVector_Destroy(&s->na);

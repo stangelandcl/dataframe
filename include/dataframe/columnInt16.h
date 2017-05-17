@@ -1,4 +1,11 @@
+#include "dataframe/config.h"
 #include "dataframe/column.h"
+#include <stdint.h>
+#include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct DataFrame_ColumnInt16 DataFrame_ColumnInt16;
 typedef struct
@@ -24,3 +31,8 @@ typedef struct
 } DataFrame_ColumnInt16Methods;
 
 DATAFRAME_EXPORT DataFrame_ColumnInt16* DataFrame_ColumnInt16_New();
+
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,10 +1,11 @@
 #include "dataframe/columnUInt16.h"
+#include "dataframe/atomic.h"
 #include <memory.h>
 
 struct DataFrame_ColumnUInt16
 {
     DataFrame_ColumnUInt16Methods* methods;
-    uint32_t ref_count;
+    volatile uint32_t ref_count;
     char* name;
     uint16_t* data;
     size_t size;
@@ -23,7 +24,7 @@ Cast(DataFrame_ColumnUInt16* self, DataFrame_Type type)
 static bool
 IncRef(DataFrame_ColumnUInt16* self)
 {
-    return ++self->ref_count > 0;
+    return InterlockedIncrement(&self->ref_count) > 0;
 }
 
 static bool
@@ -31,10 +32,11 @@ DecRef(DataFrame_ColumnUInt16* self)
 {
     DataFrame_ColumnUInt16* s = (DataFrame_ColumnUInt16*)self;
 
-    if(--s->ref_count == 0)
+    if(!InterlockedDecrement(&s->ref_count))
     {
         free(s->data);
         DataFrame_BitVector_Destroy(&s->na);
+	free(self);
         return true;
     }
     return false;

@@ -5,6 +5,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct
 {
     uint8_t* data;
@@ -27,7 +32,9 @@ DataFrame_BitVector_Clear(DataFrame_BitVector* v);
 DATAFRAME_EXPORT void
 DataFrame_BitVector_Destroy(DataFrame_BitVector* v);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

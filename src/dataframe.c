@@ -1,4 +1,5 @@
 #include "dataframe/dataframe.h"
+#include "dataframe/atomic.h"
 #include <memory.h>
 
 
@@ -13,14 +14,14 @@ Cast(DataFrame* self, DataFrame_Type type)
 static bool
 IncRef(DataFrame* self)
 {
-    return ++self->ref_count > 0;
+    return InterlockedIncrement(&self->ref_count) > 0;
 }
 
 static bool
 DecRef(DataFrame* self)
 {
     size_t i;
-    if(--self->ref_count == 0)
+    if(!InterlockedDecrement(&self->ref_count))
     {
         for(i=0;i<self->size;i++)        
             self->columns[i]->methods->DecRef(self->columns[i]);        
