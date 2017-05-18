@@ -21,6 +21,8 @@ typedef struct
     void (*Clear)(DataFrame_Column* self);
     char* (*GetName)(DataFrame_Column* self);
     const char* (*SetName)(DataFrame_Column* self, const char*);
+    bool (*HasValue)(DataFrame_Column* self, size_t index);
+    uint8_t* (*GetNAs)(DataFrame_Column* self);
 } DataFrame_ColumnMethods;
 
 struct DataFrame_Column

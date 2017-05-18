@@ -20,12 +20,16 @@ typedef struct
     void (*Clear)(DataFrame_Column{{name}}* self);
     char* (*GetName)(DataFrame_Column{{name}}* self);
     const char* (*SetName)(DataFrame_Column{{name}}* self, const char* name);
+    bool (*HasValue)(DataFrame_Column{{name}}* self, size_t index);
+    uint8_t* (*GetNAs)(DataFrame_Column{{name}}* self);
 
 
     /* type specific */
     bool (*TryGet)(DataFrame_Column{{name}}* self, size_t index, {{type}}* v);
+    /* returns a reference */
+    {{type}}* (*Get)(DataFrame_Column{{name}}* self, size_t index);
 
-    {% if "{{type}}" == "char*" %}
+    {% if type == "char*" %}
     const char* (*Add)(DataFrame_Column{{name}}* self, const {{type}} v);
     {% else %}
     const char* (*Add)(DataFrame_Column{{name}}* self, {{type}} v);
@@ -33,7 +37,7 @@ typedef struct
 
     const char* (*AddNA)(DataFrame_Column{{name}}* self);
 
-    {% if "{{type}}" == "char*" %}
+    {% if type == "char*" %}
     void (*Set)(DataFrame_Column{{name}}* self, size_t i, const {{type}} v);
     {% else %}
     void (*Set)(DataFrame_Column{{name}}* self, size_t i, {{type}} v);

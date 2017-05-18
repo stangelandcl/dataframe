@@ -89,7 +89,7 @@ Resize(DataFrame_Column{{name}}Impl* self)
     return NULL;
 }
 
-{% if "{{type}}" == "char*" %}
+{% if type == "char*" %}
 
 static const char*
 Add(DataFrame_Column{{name}}* self, const char* v)
@@ -216,6 +216,24 @@ SetName(DataFrame_Column{{name}}* self, const char* name)
     return NULL;
 }
 
+static bool
+HasValue(DataFrame_Column{{name}}* self, size_t index)
+{
+    bool na = DataFrame_BitVector_Get(&SELF->na, index);
+    return !na;
+}
+
+static {{type}}*
+Get(DataFrame_Column{{name}}* self, size_t index)
+{
+    return &SELF->data[index];
+}
+
+static uint8_t*
+GetNAs(DataFrame_Column{{name}}* self)
+{
+    return SELF->na.data;
+}
 
 static DataFrame_Column{{name}}Methods {{name}}Methods =
 {
@@ -229,9 +247,12 @@ static DataFrame_Column{{name}}Methods {{name}}Methods =
     Clear,
     GetName,
     SetName,
+    HasValue,
+    GetNAs,
 
 /* type specific */
     TryGet,
+    Get,
     Add,
     AddNA,
     Set,

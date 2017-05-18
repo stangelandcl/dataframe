@@ -28,7 +28,7 @@ SOURCES=\
 	src/columnUInt64.c \
 	src/columnFloat32.c \
 	src/columnFloat64.c \
-	src/columnCString.c \
+	src/columnString.c \
 	src/dataframe.c
 TEST_SOURCES=test/test.c
 STATIC_OBJDIR=obj/static

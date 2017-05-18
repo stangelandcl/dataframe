@@ -20,10 +20,14 @@ typedef struct
     void (*Clear)(DataFrame_ColumnFloat64* self);
     char* (*GetName)(DataFrame_ColumnFloat64* self);
     const char* (*SetName)(DataFrame_ColumnFloat64* self, const char* name);
+    bool (*HasValue)(DataFrame_ColumnFloat64* self, size_t index);
+    uint8_t* (*GetNAs)(DataFrame_ColumnFloat64* self);
 
 
     /* type specific */
     bool (*TryGet)(DataFrame_ColumnFloat64* self, size_t index, double* v);
+    /* returns a reference */
+    double* (*Get)(DataFrame_ColumnFloat64* self, size_t index);
 
     const char* (*Add)(DataFrame_ColumnFloat64* self, double v);
 

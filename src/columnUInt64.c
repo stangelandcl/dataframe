@@ -169,6 +169,24 @@ SetName(DataFrame_ColumnUInt64* self, const char* name)
     return NULL;
 }
 
+static bool
+HasValue(DataFrame_ColumnUInt64* self, size_t index)
+{
+    bool na = DataFrame_BitVector_Get(&SELF->na, index);
+    return !na;
+}
+
+static uint64_t*
+Get(DataFrame_ColumnUInt64* self, size_t index)
+{
+    return &SELF->data[index];
+}
+
+static uint8_t*
+GetNAs(DataFrame_ColumnUInt64* self)
+{
+    return SELF->na.data;
+}
 
 static DataFrame_ColumnUInt64Methods UInt64Methods =
 {
@@ -182,9 +200,12 @@ static DataFrame_ColumnUInt64Methods UInt64Methods =
     Clear,
     GetName,
     SetName,
+    HasValue,
+    GetNAs,
 
 /* type specific */
     TryGet,
+    Get,
     Add,
     AddNA,
     Set,

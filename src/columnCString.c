@@ -89,10 +89,14 @@ Resize(DataFrame_ColumnCStringImpl* self)
     return NULL;
 }
 
+
 static const char*
-Add(DataFrame_ColumnCString* self, char* v)
+Add(DataFrame_ColumnCString* self, const char* v)
 {
-    const char* e = DataFrame_BitVector_Add(&SELF->na, false);
+    char* v2;
+    bool na = v ? false : true;
+
+    const char* e = DataFrame_BitVector_Add(&SELF->na, na);
     if(e) return e;
 
     if(SELF->size == SELF->capacity)
@@ -101,16 +105,32 @@ Add(DataFrame_ColumnCString* self, char* v)
         if(e) return e;
     }
 
-
-    SELF->data[SELF->size++] = v;
+    if(na)
+        SELF->data[SELF->size++] = NULL;
+    else
+    {
+        v2 = strdup(v);
+        if(!v2)
+            return "DataFrame_ColumnCString_Add: Out of memory";
+        SELF->data[SELF->size++] = v2;
+    }
     return NULL;
 }
 
 static void
-Set(DataFrame_ColumnCString* self, size_t i, char* v)
+Set(DataFrame_ColumnCString* self, size_t i, const char* v)
 {
-    DataFrame_BitVector_Set(&SELF->na, i, false);
-    SELF->data[i] = v;
+    bool na = v ? false : true;
+    if(na)
+    {
+        DataFrame_BitVector_Set(&SELF->na, i, na);
+        SELF->data[i] = NULL;
+    }
+    else
+    {
+        SELF->data[i] = strdup(v);
+        DataFrame_BitVector_Set(&SELF->na, i, !na && SELF->data[i]);
+    }
 }
 
 
@@ -169,6 +189,24 @@ SetName(DataFrame_ColumnCString* self, const char* name)
     return NULL;
 }
 
+static bool
+HasValue(DataFrame_ColumnCString* self, size_t index)
+{
+    bool na = DataFrame_BitVector_Get(&SELF->na, index);
+    return !na;
+}
+
+static char**
+Get(DataFrame_ColumnCString* self, size_t index)
+{
+    return &SELF->data[index];
+}
+
+static uint8_t*
+GetNAs(DataFrame_ColumnCString* self)
+{
+    return SELF->na.data;
+}
 
 static DataFrame_ColumnCStringMethods CStringMethods =
 {
@@ -182,9 +220,12 @@ static DataFrame_ColumnCStringMethods CStringMethods =
     Clear,
     GetName,
     SetName,
+    HasValue,
+    GetNAs,
 
 /* type specific */
     TryGet,
+    Get,
     Add,
     AddNA,
     Set,

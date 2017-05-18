@@ -15,7 +15,7 @@ typedef enum
     DataFrame_Type_ColumnUInt64,
     DataFrame_Type_ColumnFloat32,
     DataFrame_Type_ColumnFloat64,
-    DataFrame_Type_ColumnCString
+    DataFrame_Type_ColumnString
 } DataFrame_Type;
 
 

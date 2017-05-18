@@ -9,8 +9,8 @@ extern "C" {
     #pragma comment(lib, "kernel32.lib")
     long __cdecl _InterlockedIncrement(long volatile *Addend);
     long __cdecl _InterlockedDecrement(long volatile *Addend);
-    #define InterlockedIncrement _InterlockedIncrement
-    #define InterlockedDecrement _InterlockedDecrement
+    #define InterlockedIncrement(x) _InterlockedIncrement((long volatile*)x)
+    #define InterlockedDecrement(x) _InterlockedDecrement((long volatile*)x)
 #elif defined(__GNUC__)
     #ifndef InterlockedIncrement
         #define InterlockedIncrement(p) \

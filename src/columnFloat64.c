@@ -169,6 +169,24 @@ SetName(DataFrame_ColumnFloat64* self, const char* name)
     return NULL;
 }
 
+static bool
+HasValue(DataFrame_ColumnFloat64* self, size_t index)
+{
+    bool na = DataFrame_BitVector_Get(&SELF->na, index);
+    return !na;
+}
+
+static double*
+Get(DataFrame_ColumnFloat64* self, size_t index)
+{
+    return &SELF->data[index];
+}
+
+static uint8_t*
+GetNAs(DataFrame_ColumnFloat64* self)
+{
+    return SELF->na.data;
+}
 
 static DataFrame_ColumnFloat64Methods Float64Methods =
 {
@@ -182,9 +200,12 @@ static DataFrame_ColumnFloat64Methods Float64Methods =
     Clear,
     GetName,
     SetName,
+    HasValue,
+    GetNAs,
 
 /* type specific */
     TryGet,
+    Get,
     Add,
     AddNA,
     Set,
