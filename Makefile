@@ -75,7 +75,7 @@ check: $(STATIC_LIB)
 	./check
 
 clean:
-	@rm -rf obj $(OBJECTS) $(STATIC_LIB) $(SHARED_LIB) $(TEST)
+	@rm -rf obj $(SHARED_OBJECTS) $(STATIC_OBJECTS) $(STATIC_LIB) $(SHARED_LIB) $(TEST)
 
 all: 
 	@make --no-print-directory clean

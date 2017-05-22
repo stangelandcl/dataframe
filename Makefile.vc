@@ -3,7 +3,7 @@
 all: shared static dotnet
 
 # Open MSVC tools window and run: nmake /f Makefile.vc MACHINE=[x86|x64]
-LIB=dateframe
+LIB=dataframe
 CPPNAME=DATAFRAME
 DOTNET_LIB=DataFrameSharp
 CFLAGS=/O2 /DNDEBUG /MD /FD /W3 /nologo /D_CRT_SECURE_NO_WARNINGS
