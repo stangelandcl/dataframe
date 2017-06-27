@@ -71,7 +71,7 @@ $(SHARED_LIB): $(SHARED_OBJECTS)
 	@echo "LD $(SHARED_LIB)"
 
 check: $(STATIC_LIB)
-	@$(CC) $(CFLAGS) $(LDFLAGS) $(TEST_SOURCES) -o $(TEST) -L. -Wl,-Bstatic -l$(LIBNAME) -Wl,-Bdynamic
+	@$(CC) $(CFLAGS) $(LDFLAGS) $(TEST_SOURCES) -o $(TEST) -L. $(STATIC_LIB) 
 	./check
 
 clean:
